@@ -15,7 +15,7 @@ class Container:
         self._registry: Dict[str, Any] = {}
 
     # Define complete overloads for Register method
-    def register(self, service_type: Type[T], implementation: Optional[ServiceImplementation[T]] = None,
+    def register(self, service_type: Union[str, ServiceType], implementation: Optional[ServiceImplementation[T]] = None,
                  name: Optional[str] = None):
         """
         Register a service in the container.
@@ -38,7 +38,7 @@ class Container:
         else:
             self._registry[key] = implementation
 
-    def resolve(self, service_type: Type[T], name: Optional[str] = None) -> T:
+    def resolve(self, service_type: Union[str, ServiceType], name: Optional[str] = None) -> T:
         """
         Resolve a service from the container.
 
@@ -70,7 +70,7 @@ class Container:
             # It's an instance, return as is
             return cast(T, implementation)
 
-    def can_resolve(self, service_type: Type[T], name: Optional[str] = None) -> bool:
+    def can_resolve(self, service_type: Union[str, ServiceType], name: Optional[str] = None) -> bool:
         """
         Check if a service can be resolved from the container.
 
@@ -84,7 +84,7 @@ class Container:
         key = self._get_key(service_type, name)
         return key in self._registry
 
-    def unregister(self, service_type: Type[T], name: Optional[str] = None) -> bool:
+    def unregister(self, service_type: Union[str, ServiceType], name: Optional[str] = None) -> bool:
         """
         Remove a service registration from the container.
 
@@ -102,10 +102,16 @@ class Container:
         return False
 
     @staticmethod
-    def _get_key(service_type: Type[Any], name: Optional[str] = None) -> str:
+    def _get_key(service_type: Union[str, ServiceType], name: Optional[str] = None) -> str:
         """Generate a unique key for the registry based on type and name."""
+        if isinstance(service_type, str):
+            return f"callable-{service_type}:{name}" if name else f"callable-{service_type}"
         type_name = service_type.__name__ if hasattr(service_type, "__name__") else str(service_type)
         return f"{type_name}:{name}" if name else type_name
 
 
-current = Container()
+_current = Container()
+
+def current() -> Container:
+    global _current
+    return _current

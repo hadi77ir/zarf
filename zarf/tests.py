@@ -28,6 +28,13 @@ class ServiceWithDependency:
         return "ServiceWithDependency executed"
 
 
+def FunctionA():
+    return "FunctionA executed"
+
+def FunctionB():
+    return "FunctionB executed"
+
+
 @pytest.fixture
 def container():
     """Create a fresh container for each test."""
@@ -99,6 +106,11 @@ class TestContainerResolution:
         container.register(ServiceA, instance)
         resolved = container.resolve(ServiceA)
         assert resolved is instance
+
+    def test_resolve_function(self, container):
+        container.register('test_function', FunctionA)
+        resolved = container.resolve('test_function')
+        assert resolved == FunctionA()
 
     def test_resolve_named(self, container):
         container.register(IService, ServiceA(), "A")

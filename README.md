@@ -19,10 +19,13 @@ pip install zarf
 ## Basic Usage
 
 ```python
-from zarf import Container
+import zarf
 
-# Create the container
-container = Container()
+# Create a local container
+container = zarf.Container()
+
+# or use the global one
+container = zarf.current()
 
 # Register a concrete class
 container.register(UserService)
